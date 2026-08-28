@@ -15,6 +15,7 @@ import { UsersModule } from './users/users.module.js';
 import { TelegramModule } from './telegram/telegram.module.js';
 import { GameModule } from './game/game.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
+import { GiftsModule } from './gifts/gifts.module.js';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { PaymentsModule } from './payments/payments.module.js';
     UsersModule,
     TelegramModule,
     GameModule,
-    PaymentsModule
+    PaymentsModule,
+    GiftsModule
   ],
 })
 export class AppModule {}

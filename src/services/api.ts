@@ -89,3 +89,18 @@ export class GameSocket {
 }
 
 export const gameSocket = new GameSocket();
+
+export const getGifts = async () => {
+  const response = await apiClient.get('/gifts');
+  return response.data;
+};
+
+export const withdrawGifts = async (giftIds: string[]) => {
+  const response = await apiClient.post('/gifts/withdraw', { giftIds });
+  return response.data;
+};
+
+export const mockDepositGift = async (type: string, estimatedValue: number) => {
+  const response = await apiClient.post('/gifts/mock-deposit', { type, estimatedValue });
+  return response.data;
+};

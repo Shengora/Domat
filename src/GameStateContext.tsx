@@ -2,6 +2,8 @@ import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Player } from './data/mockData';
 
+export type ViewType = 'game' | 'profile';
+
 interface GameStateContextType {
   status: 'waiting' | 'starting' | 'live' | 'finished';
   setStatus: (status: 'waiting' | 'starting' | 'live' | 'finished') => void;
@@ -17,6 +19,10 @@ interface GameStateContextType {
   setBalance: (bal: number) => void;
   history: any[];
   setHistory: (hist: any[]) => void;
+  currentView: ViewType;
+  setCurrentView: (view: ViewType) => void;
+  gifts: any[];
+  setGifts: (gifts: any[]) => void;
 }
 
 const GameStateContext = createContext<GameStateContextType | undefined>(undefined);
@@ -29,9 +35,11 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [balance, setBalance] = useState<number>(0);
   const [history, setHistory] = useState<any[]>([]);
+  const [currentView, setCurrentView] = useState<ViewType>('game');
+  const [gifts, setGifts] = useState<any[]>([]);
 
   return (
-    <GameStateContext.Provider value={{ status, setStatus, countdown, setCountdown, winnerFactor, setWinnerFactor, winnerId, setWinnerId, players, setPlayers, balance, setBalance, history, setHistory }}>
+    <GameStateContext.Provider value={{ status, setStatus, countdown, setCountdown, winnerFactor, setWinnerFactor, winnerId, setWinnerId, players, setPlayers, balance, setBalance, history, setHistory, currentView, setCurrentView, gifts, setGifts }}>
       {children}
     </GameStateContext.Provider>
   );

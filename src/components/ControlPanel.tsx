@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Gift, Wallet, PenSquare, RefreshCw } from 'lucide-react';
+import { TonConnectButton } from '@tonconnect/ui-react';
+import { depositGram } from '../services/api';
 
 export const ControlPanel: React.FC = () => {
   const [mode, setMode] = useState<'single' | 'group'>('single');
@@ -23,10 +25,22 @@ export const ControlPanel: React.FC = () => {
 
           {/* Left icons */}
           <div className="flex space-x-3">
+            <TonConnectButton className="my-ton-connect-btn" />
             <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
               <Gift size={20} className="text-pink-400" />
             </button>
-            <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+            <button
+              className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition"
+              title="Deposit 1 GRAM for testing"
+              onClick={async () => {
+                 try {
+                     await depositGram(1, "mock_tx_hash_" + Date.now());
+                     alert('Deposit successful');
+                 } catch (e) {
+                     console.error(e);
+                 }
+              }}
+            >
               <Wallet size={20} className="text-blue-400" />
             </button>
           </div>

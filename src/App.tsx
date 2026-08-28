@@ -36,7 +36,20 @@ function App() {
 
     initApp();
 
-    gameSocket.onGameState((data) => setStatus(data.status));
+    gameSocket.onGameState((data) => {
+       setStatus(data.status);
+       if (data.players && data.players.length > 0) {
+           const formattedPlayers = data.players.map((p: any, index: number) => ({
+               id: p.user_id.toString(),
+               name: `Player ${p.user_id}`,
+               avatar: `https://i.pravatar.cc/150?u=${p.user_id}`,
+               betAmount: Number(p.amount_or_gift_id),
+               colorStart: index % 2 === 0 ? '#A855F7' : '#06B6D4',
+               colorEnd: index % 2 === 0 ? '#EC4899' : '#3B82F6',
+           }));
+           setPlayers(formattedPlayers);
+       }
+    });
     gameSocket.onGameStarting((data) => {
       setStatus('starting');
       setCountdown(data.countdown);

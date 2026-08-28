@@ -36,12 +36,24 @@ export class GameService {
   async getActiveGame(): Promise<Game> {
     let game = await this.gameRepository.findOne({
       where: [{ status: 'waiting' }, { status: 'starting' }],
+      relations: { participants: true },
       order: { created_at: 'DESC' }
     });
     if (!game) {
       game = await this.createNewGame();
+      game.participants = [];
     }
     return game;
+  }
+
+  async addParticipant(gameId: string, userId: number, amount: number) {
+     const participant = this.participantRepository.create({
+         game_id: gameId,
+         user_id: userId,
+         stake_type: 'gram',
+         amount_or_gift_id: amount.toString()
+     });
+     await this.participantRepository.save(participant);
   }
 
   async updateGameStatus(game: Game, status: 'waiting' | 'starting' | 'live' | 'finished') {

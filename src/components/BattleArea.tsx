@@ -133,19 +133,6 @@ export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, curre
            clipPath={`url(#clip-${p.id})`}
            preserveAspectRatio="xMidYMid slice"
          />
-         {p.username && avatarSize > 40 && (
-            <text
-              x={cx}
-              y={cy + avatarSize / 2 + 16}
-              fill="white"
-              fontSize="12"
-              fontWeight="bold"
-              textAnchor="middle"
-              style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.8)" }}
-            >
-              {p.username}
-            </text>
-         )}
       </g>
     );
   };

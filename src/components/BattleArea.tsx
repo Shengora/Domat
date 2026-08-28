@@ -9,7 +9,6 @@ interface BattleAreaProps {
 }
 
 export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, currency, status }) => {
-  // SVG viewBox size
   const width = 400;
   const height = 400;
 
@@ -29,118 +28,130 @@ export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, curre
     }
   };
 
-  // Calculate proportional slices from top to bottom
-  const renderSlices = () => {
-    let currentY = 0;
+  if (!players || players.length === 0) return null;
 
-    return players.map((player, index) => {
-      const share = player.betAmount / totalBet;
-      let layerHeight = share * height;
+  // Sort players descending by bet amount
+  const sortedPlayers = [...players].sort((a, b) => b.betAmount - a.betAmount);
 
-      const startY = currentY;
-      const endY = currentY + layerHeight;
-      currentY = endY;
+  // Player 0 is the background (largest area)
+  const p0 = sortedPlayers[0];
 
-      // Ensure the avatar size is dynamic based on layer height, but not too big
-      const avatarSize = Math.min(layerHeight * 0.8, 60);
-      const avatarX = width / 2;
-      const avatarY = startY + (layerHeight / 2);
+  // Group remaining players by corner: 0=TL, 1=BR, 2=TR, 3=BL
+  const corners: Player[][] = [[], [], [], []];
+  for (let i = 1; i < sortedPlayers.length; i++) {
+    corners[(i - 1) % 4].push(sortedPlayers[i]);
+  }
 
-      // Create a wavy boundary for the bottom of the layer, except the last one
-      let pathData = '';
-      if (index === players.length - 1) {
-        // Last item goes straight to the bottom
-        pathData = `M 0 ${startY} L 0 ${height} L ${width} ${height} L ${width} ${startY}`;
-        if (index > 0) {
-           // We need to match the previous wave if we are not the first
-           const prevEndY = startY;
-           const waveAmplitude = 15;
-           pathData = `M 0 ${prevEndY} C ${width * 0.3} ${prevEndY + waveAmplitude}, ${width * 0.7} ${prevEndY - waveAmplitude}, ${width} ${prevEndY} L ${width} ${height} L 0 ${height} Z`;
-        }
-      } else {
-         // Create wavy bottom boundary
-         const waveAmplitude = 15;
-         const nextY = endY;
+  const cornerElements: any[] = [];
+  const cornerMaxA = [0, 0, 0, 0];
 
-         if (index === 0) {
-            pathData = `M 0 0 L 0 ${nextY} C ${width * 0.3} ${nextY + waveAmplitude}, ${width * 0.7} ${nextY - waveAmplitude}, ${width} ${nextY} L ${width} 0 Z`;
-         } else {
-            const prevEndY = startY;
-            pathData = `M 0 ${prevEndY} C ${width * 0.3} ${prevEndY + waveAmplitude}, ${width * 0.7} ${prevEndY - waveAmplitude}, ${width} ${prevEndY} L ${width} ${nextY} C ${width * 0.7} ${nextY - waveAmplitude}, ${width * 0.3} ${nextY + waveAmplitude}, 0 ${nextY} Z`;
-         }
+  corners.forEach((cornerPlayers, cornerIndex) => {
+    const totalCornerArea = cornerPlayers.reduce((sum, p) => sum + (p.betAmount / totalBet), 0);
+    let currentOuterArea = totalCornerArea;
+
+    cornerPlayers.forEach((p) => {
+      const pFraction = p.betAmount / totalBet;
+      const outerA = currentOuterArea;
+      const innerA = currentOuterArea - pFraction;
+
+      const a_out = Math.sqrt(2 * outerA * width * height);
+      const a_in = Math.sqrt(2 * Math.max(0, innerA) * width * height);
+
+      cornerMaxA[cornerIndex] = Math.max(cornerMaxA[cornerIndex], a_out);
+
+      let points = "";
+      let cx = 0, cy = 0;
+      const d = (a_out + a_in) / 4;
+
+      if (cornerIndex === 0) { // TL
+        points = `0,0 ${a_out},0 0,${a_out}`;
+        cx = d; cy = d;
+      } else if (cornerIndex === 1) { // BR
+        points = `${width},${height} ${width - a_out},${height} ${width},${height - a_out}`;
+        cx = width - d; cy = height - d;
+      } else if (cornerIndex === 2) { // TR
+        points = `${width},0 ${width},${a_out} ${width - a_out},0`;
+        cx = width - d; cy = d;
+      } else if (cornerIndex === 3) { // BL
+        points = `0,${height} ${a_out},${height} 0,${height - a_out}`;
+        cx = d; cy = height - d;
       }
 
-      return (
-        <g key={player.id}>
-          <defs>
-            <linearGradient id={`grad-${player.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor={player.colorStart} />
-              <stop offset="100%" stopColor={player.colorEnd} />
-            </linearGradient>
+      currentOuterArea = innerA;
 
-            {/* Clip path for avatar */}
-            <clipPath id={`clip-${player.id}`}>
-              <circle cx={avatarX} cy={avatarY} r={avatarSize / 2} />
-            </clipPath>
-          </defs>
+      const bandWidth = (a_out - a_in) / Math.SQRT2;
+      const avatarSize = Math.max(20, Math.min(bandWidth * 0.8, 60));
 
-          {/* Layer Background */}
-          <path d={pathData} fill={`url(#grad-${player.id})`} />
-
-          {/* Layer Boundary Line (Subtle overlay for depth) */}
-          {index !== players.length - 1 && (
-            <path
-              d={`M 0 ${endY} C ${width * 0.3} ${endY + 15}, ${width * 0.7} ${endY - 15}, ${width} ${endY}`}
-              fill="none"
-              stroke="rgba(255,255,255,0.15)"
-              strokeWidth="2"
-            />
-          )}
-
-          {/* Avatar (only show if height is enough to fit a small reasonable avatar, e.g. > 20px) */}
-          {layerHeight > 25 && (
-            <g>
-               {/* Avatar Border */}
-               <circle
-                 cx={avatarX}
-                 cy={avatarY}
-                 r={(avatarSize / 2) + 2}
-                 fill="white"
-                 opacity="0.2"
-               />
-               <image
-                 href={player.avatar}
-                 x={avatarX - avatarSize / 2}
-                 y={avatarY - avatarSize / 2}
-                 height={avatarSize}
-                 width={avatarSize}
-                 clipPath={`url(#clip-${player.id})`}
-                 preserveAspectRatio="xMidYMid slice"
-               />
-               {/* Optional Username Overlay if large enough */}
-               {player.username && avatarSize > 40 && (
-                  <text
-                    x={avatarX}
-                    y={avatarY + avatarSize / 2 + 14}
-                    fill="white"
-                    fontSize="11"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                    style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.8)" }}
-                  >
-                    {player.username}
-                  </text>
-               )}
-            </g>
-          )}
-        </g>
-      );
+      cornerElements.push({
+        id: p.id,
+        player: p,
+        points,
+        cx, cy,
+        avatarSize,
+        showAvatar: bandWidth > 25
+      });
     });
+  });
+
+  // Calculate P0 avatar position based on remaining visible shape
+  const [a_TL, a_BR, a_TR, a_BL] = cornerMaxA;
+  const p0_pts = [
+    [Math.min(width, a_TL), 0],
+    [Math.max(0, width - a_TR), 0],
+    [width, Math.min(height, a_TR)],
+    [width, Math.max(0, height - a_BR)],
+    [Math.max(0, width - a_BR), height],
+    [Math.min(width, a_BL), height],
+    [0, Math.max(0, height - a_BL)],
+    [0, Math.min(height, a_TL)]
+  ];
+  const p0_cx = p0_pts.reduce((sum, pt) => sum + pt[0], 0) / 8;
+  const p0_cy = p0_pts.reduce((sum, pt) => sum + pt[1], 0) / 8;
+
+  const renderPlayerContent = (p: Player, cx: number, cy: number, avatarSize: number) => {
+    return (
+      <g key={`content-${p.id}`}>
+         <defs>
+           <clipPath id={`clip-${p.id}`}>
+             <circle cx={cx} cy={cy} r={avatarSize / 2} />
+           </clipPath>
+         </defs>
+
+         <circle
+           cx={cx}
+           cy={cy}
+           r={(avatarSize / 2) + 3}
+           fill="white"
+           opacity="0.3"
+         />
+         <image
+           href={p.avatar}
+           x={cx - avatarSize / 2}
+           y={cy - avatarSize / 2}
+           height={avatarSize}
+           width={avatarSize}
+           clipPath={`url(#clip-${p.id})`}
+           preserveAspectRatio="xMidYMid slice"
+         />
+         {p.username && avatarSize > 40 && (
+            <text
+              x={cx}
+              y={cy + avatarSize / 2 + 16}
+              fill="white"
+              fontSize="12"
+              fontWeight="bold"
+              textAnchor="middle"
+              style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.8)" }}
+            >
+              {p.username}
+            </text>
+         )}
+      </g>
+    );
   };
 
   return (
     <div className="w-full mb-6">
-      {/* Header */}
       <div className="flex justify-between items-end mb-3 px-1">
         <div>
           <div className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-0.5">Total</div>
@@ -153,14 +164,39 @@ export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, curre
         </div>
       </div>
 
-      {/* Battle Card Container */}
-      <div className="relative w-full rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 shadow-xl" style={{ aspectRatio: '1/1' }}>
+      <div className="relative w-full rounded-2xl overflow-hidden bg-gray-900 shadow-2xl ring-1 ring-gray-800" style={{ aspectRatio: '1/1' }}>
          <svg
            viewBox={`0 0 ${width} ${height}`}
            className="w-full h-full"
            preserveAspectRatio="none"
          >
-           {renderSlices()}
+           <defs>
+             {players.map(p => (
+               <linearGradient key={`grad-${p.id}`} id={`grad-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                 <stop offset="0%" stopColor={p.colorStart} />
+                 <stop offset="100%" stopColor={p.colorEnd} />
+               </linearGradient>
+             ))}
+           </defs>
+
+           {/* Player 0 Background */}
+           <rect x="0" y="0" width={width} height={height} fill={`url(#grad-${p0.id})`} />
+
+           {/* Corner Players */}
+           {cornerElements.map(el => (
+             <polygon key={`poly-${el.id}`} points={el.points} fill={`url(#grad-${el.player.id})`} />
+           ))}
+
+           {/* Stroke Lines for Boundaries */}
+           {cornerElements.map(el => (
+             <polygon key={`stroke-${el.id}`} points={el.points} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" />
+           ))}
+
+           {/* Player 0 Content */}
+           {renderPlayerContent(p0, p0_cx, p0_cy, 64)}
+
+           {/* Corner Players Content */}
+           {cornerElements.map(el => el.showAvatar && renderPlayerContent(el.player, el.cx, el.cy, el.avatarSize))}
          </svg>
       </div>
     </div>

@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { mockPlayers, gameInfo } from './data/mockData';
 import { BattleArea } from './components/BattleArea';
 import { PlayersList } from './components/PlayersList';
@@ -7,6 +7,8 @@ import { ControlPanel } from './components/ControlPanel';
 import { BottomNav } from './components/BottomNav';
 import { authTelegram, gameSocket } from './services/api';
 import { useGameState } from './GameStateContext';
+import { WalletModal } from './components/WalletModal';
+import { getBalance } from './services/api';
 
 declare global {
   interface Window {
@@ -17,7 +19,17 @@ declare global {
 }
 
 function App() {
-  const { status, setStatus, countdown, setCountdown, setWinnerFactor, setWinnerId, players, setPlayers } = useGameState();
+  const { status, setStatus, countdown, setCountdown, setWinnerFactor, setWinnerId, players, setPlayers, balance, setBalance } = useGameState();
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+
+  const fetchBalance = async () => {
+      try {
+        const balData = await getBalance();
+        setBalance(balData.balance);
+      } catch (e) {
+          console.error('Failed to fetch balance', e);
+      }
+  }
 
   useEffect(() => {
     // initialize with mock data until real backend sends it
@@ -29,6 +41,7 @@ function App() {
       try {
         await authTelegram(initData);
         gameSocket.connect();
+        await fetchBalance();
       } catch (e) {
         console.error('Authentication failed', e);
       }
@@ -49,6 +62,8 @@ function App() {
            }));
            setPlayers(formattedPlayers);
        }
+       // When a new game state arrives, the player's balance might have changed (e.g. they joined and bet)
+       fetchBalance();
     });
     gameSocket.onGameStarting((data) => {
       setStatus('starting');
@@ -65,22 +80,31 @@ function App() {
     gameSocket.onGameFinished(() => {
       setStatus('finished');
       setCountdown(null);
+      // Fetch balance after game finishes to reflect winnings
+      fetchBalance();
     });
-
-    const handleMockJoin = () => {
-       gameSocket.joinGame();
-    }
-    window.addEventListener('mock-join', handleMockJoin);
 
     return () => {
       gameSocket.disconnect();
-      window.removeEventListener('mock-join', handleMockJoin);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center">
       <div className="w-full max-w-md bg-[#121212] h-screen relative flex flex-col shadow-2xl overflow-hidden">
+
+        {/* Header with Balance */}
+        <div className="h-16 border-b border-gray-800 flex items-center justify-between px-4 shrink-0 bg-[#121212] z-40">
+           <div className="flex items-center space-x-2 cursor-pointer bg-[#1A1A1A] hover:bg-[#242424] px-3 py-1.5 rounded-full transition border border-gray-800" onClick={() => setIsWalletOpen(true)}>
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                 <span className="text-blue-400 font-bold text-sm">G</span>
+              </div>
+              <span className="font-bold text-lg">{(balance || 0).toFixed(2)}</span>
+           </div>
+           <button onClick={() => setIsWalletOpen(true)} className="text-sm font-semibold text-gray-400 hover:text-white px-3 py-1.5 rounded-full border border-gray-800">
+               Wallet
+           </button>
+        </div>
 
         {/* Main Content Container */}
         <div className="flex-1 overflow-y-auto px-4 pt-6 pb-[200px] no-scrollbar">
@@ -104,6 +128,7 @@ function App() {
         <ControlPanel />
         <BottomNav />
 
+        <WalletModal isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} />
       </div>
     </div>
   );

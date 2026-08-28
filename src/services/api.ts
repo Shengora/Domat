@@ -34,6 +34,16 @@ export const withdrawGram = async (amount: number) => {
   return response.data;
 };
 
+export const getBalance = async () => {
+  const response = await apiClient.get('/payments/balance');
+  return response.data;
+};
+
+export const getHistory = async () => {
+  const response = await apiClient.get('/payments/history');
+  return response.data;
+};
+
 export class GameSocket {
   private socket: Socket;
 
@@ -73,8 +83,8 @@ export class GameSocket {
     this.socket.on('game_finished', callback);
   }
 
-  joinGame() {
-    this.socket.emit('join_game', {});
+  joinGame(betAmount: number) {
+    this.socket.emit('join_game', { betAmount });
   }
 }
 

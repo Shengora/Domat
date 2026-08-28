@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
 import { PaymentsService } from './payments.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 
@@ -15,5 +15,15 @@ export class PaymentsController {
   @Post('withdraw')
   async withdraw(@Req() req: any, @Body('amount') amount: number) {
       return this.paymentsService.handleWithdraw(req.user.telegram_id, amount);
+  }
+
+  @Get('balance')
+  async getBalance(@Req() req: any) {
+      return this.paymentsService.getBalance(req.user.telegram_id);
+  }
+
+  @Get('history')
+  async getHistory(@Req() req: any) {
+      return this.paymentsService.getHistory(req.user.telegram_id);
   }
 }

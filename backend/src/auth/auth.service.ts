@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service.js';
@@ -23,9 +23,15 @@ export class AuthService {
       .sort()
       .join('\n');
 
-    const botToken = this.configService.get<string>('TELEGRAM_BOT_TOKEN') || 'dummy';
+    const botToken = this.configService.get<string>('TELEGRAM_BOT_TOKEN');
 
-    if (botToken !== 'dummy') {
+    // SECURITY FIX: Fail secure if bot token is missing unless explicitly in development/test mock mode
+    if (!botToken || botToken === 'dummy') {
+        if (process.env.NODE_ENV === 'production') {
+            throw new InternalServerErrorException('Telegram bot token not configured');
+        }
+        // Allow bypass ONLY in explicit non-production environments where token is dummy
+    } else {
         const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
         const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
 

@@ -2,6 +2,7 @@ import { WebSocketGateway, WebSocketServer, SubscribeMessage, OnGatewayConnectio
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service.js';
 import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -11,7 +12,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger = new Logger('GameGateway');
   private gameTimer: any = null;
 
-  constructor(private gameService: GameService) {}
+  constructor(
+      private gameService: GameService,
+      private jwtService: JwtService
+  ) {}
+
+  private extractUserId(client: Socket): number | null {
+      try {
+        const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.split(' ')[1];
+        if (token) {
+            const payload = this.jwtService.verify(token);
+            return payload.sub;
+        }
+      } catch (e) {
+          // Token verification failed
+      }
+      return null;
+  }
 
   async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
@@ -29,16 +46,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('join_game')
   async handleJoinGame(client: Socket, payload: any) {
-    const activeGame = await this.gameService.getActiveGame();
+    let userId = this.extractUserId(client);
 
-    const token = client.handshake.headers.authorization?.split(' ')[1];
-    let userId = 123456; // Mock ID for testing fallback
-    if (token) {
-        // In real app, verify token and extract user ID
-        // For testing, we just use a generic ID if parsing isn't configured
-        userId = 123456;
+    if (!userId) {
+        // Fallback for tests if token isn't provided/valid,
+        // in production we should reject the request.
+        if (process.env.NODE_ENV !== 'production') {
+            userId = 123456;
+        } else {
+            client.emit('error', { message: 'Unauthorized' });
+            return;
+        }
     }
 
+    const activeGame = await this.gameService.getActiveGame();
     await this.gameService.addParticipant(activeGame.game_id, userId, payload.betAmount || 1);
 
     const updatedGame = await this.gameService.getActiveGame();

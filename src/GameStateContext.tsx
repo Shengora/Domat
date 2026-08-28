@@ -13,6 +13,10 @@ interface GameStateContextType {
   setWinnerId: (id: string | number | null) => void;
   players: Player[];
   setPlayers: (players: Player[]) => void;
+  balance: number;
+  setBalance: (bal: number) => void;
+  history: any[];
+  setHistory: (hist: any[]) => void;
 }
 
 const GameStateContext = createContext<GameStateContextType | undefined>(undefined);
@@ -23,9 +27,11 @@ export const GameStateProvider = ({ children }: { children: ReactNode }) => {
   const [winnerFactor, setWinnerFactor] = useState<number | null>(null);
   const [winnerId, setWinnerId] = useState<string | number | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [balance, setBalance] = useState<number>(0);
+  const [history, setHistory] = useState<any[]>([]);
 
   return (
-    <GameStateContext.Provider value={{ status, setStatus, countdown, setCountdown, winnerFactor, setWinnerFactor, winnerId, setWinnerId, players, setPlayers }}>
+    <GameStateContext.Provider value={{ status, setStatus, countdown, setCountdown, winnerFactor, setWinnerFactor, winnerId, setWinnerId, players, setPlayers, balance, setBalance, history, setHistory }}>
       {children}
     </GameStateContext.Provider>
   );

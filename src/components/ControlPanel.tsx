@@ -1,11 +1,34 @@
 import React, { useState } from 'react';
 import { Gift, Wallet, PenSquare, RefreshCw } from 'lucide-react';
 import { TonConnectButton } from '@tonconnect/ui-react';
-import { depositGram } from '../services/api';
+import { depositGram, gameSocket } from '../services/api';
+import { useGameState } from '../GameStateContext';
 
 export const ControlPanel: React.FC = () => {
   const [mode, setMode] = useState<'single' | 'group'>('single');
   const [activeBet, setActiveBet] = useState<string>('0.5');
+  const { balance } = useGameState();
+
+  const handleBet = () => {
+      let amountToBet = 0;
+      if (activeBet === 'All-in') {
+          amountToBet = balance;
+      } else {
+          amountToBet = parseFloat(activeBet);
+      }
+
+      if (isNaN(amountToBet) || amountToBet <= 0) {
+          alert('Invalid bet amount');
+          return;
+      }
+
+      if (balance < amountToBet) {
+          alert('Insufficient balance');
+          return;
+      }
+
+      gameSocket.joinGame(amountToBet);
+  };
 
   const betOptions = [
     { type: 'icon', value: 'edit', icon: <PenSquare size={18} /> },
@@ -13,7 +36,7 @@ export const ControlPanel: React.FC = () => {
     { type: 'text', value: '0.5' },
     { type: 'text', value: '1' },
     { type: 'text', value: 'All-in' },
-    { type: 'icon', value: 'refresh', icon: <RefreshCw size={18} /> },
+    { type: 'icon', value: 'action', valueStr: 'BET', icon: <span className="font-black text-white">BET</span>, action: handleBet },
   ];
 
   return (
@@ -28,20 +51,6 @@ export const ControlPanel: React.FC = () => {
             <TonConnectButton className="my-ton-connect-btn" />
             <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
               <Gift size={20} className="text-pink-400" />
-            </button>
-            <button
-              className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition"
-              title="Deposit 1 GRAM for testing"
-              onClick={async () => {
-                 try {
-                     await depositGram(1, "mock_tx_hash_" + Date.now());
-                     alert('Deposit successful');
-                 } catch (e) {
-                     console.error(e);
-                 }
-              }}
-            >
-              <Wallet size={20} className="text-blue-400" />
             </button>
           </div>
 
@@ -74,11 +83,20 @@ export const ControlPanel: React.FC = () => {
           {betOptions.map((opt, idx) => (
             <button
               key={idx}
-              onClick={() => setActiveBet(opt.value)}
+              onClick={() => {
+                  if (opt.action) {
+                      opt.action();
+                  } else {
+                      setActiveBet(opt.value || '');
+                  }
+              }}
               className={`flex-1 aspect-square max-h-12 rounded-full flex items-center justify-center text-sm font-bold transition-all
-                ${activeBet === opt.value
-                  ? 'bg-purple-600 text-white border-2 border-purple-400 shadow-[0_0_15px_rgba(147,51,234,0.5)]'
-                  : 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700'}
+                ${opt.action
+                   ? 'bg-[#39FF14] text-black hover:bg-[#32e011]'
+                   : activeBet === opt.value
+                      ? 'bg-purple-600 text-white border-2 border-purple-400 shadow-[0_0_15px_rgba(147,51,234,0.5)]'
+                      : 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700'
+                 }
               `}
             >
               {opt.type === 'icon' ? opt.icon : opt.value}

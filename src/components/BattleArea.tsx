@@ -1,23 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { Player } from '../data/mockData';
+import { useGameState } from '../GameStateContext';
 
 interface BattleAreaProps {
   players: Player[];
   totalBet: number;
   currency: string;
   status: string;
+  countdown?: number | null;
 }
 
-export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, currency, status }) => {
+export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, currency, status, countdown }) => {
+  const { winnerId } = useGameState();
   const width = 400;
   const height = 400;
+
+  const [ballPos, setBallPos] = useState({ x: width / 2, y: height / 2 });
+  const reqRef = useRef<number | null>(null);
 
   // Render game status based on prop
   const renderStatus = () => {
     if (status === 'waiting') {
       return <span className="text-gray-400 text-sm">Waiting players {players.length}/2</span>;
-    } else if (status === 'starting') {
-      return <span className="text-gray-400 text-sm">Starting in 00:09</span>;
+    } else if (status === 'starting' && countdown !== null) {
+      return <span className="text-gray-400 text-sm">Starting in 00:{countdown !== undefined && countdown < 10 ? `0${countdown}` : countdown}</span>;
     } else {
       return (
         <div className="flex items-center space-x-1.5">
@@ -108,6 +114,76 @@ export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, curre
   const p0_cx = p0_pts.reduce((sum, pt) => sum + pt[0], 0) / 8;
   const p0_cy = p0_pts.reduce((sum, pt) => sum + pt[1], 0) / 8;
 
+  useEffect(() => {
+    if (status === 'live') {
+      // Find winner's center
+      let targetX = p0_cx;
+      let targetY = p0_cy;
+
+      const winnerEl = cornerElements.find(el => el.id === winnerId);
+      if (winnerEl) {
+          targetX = winnerEl.cx;
+          targetY = winnerEl.cy;
+      } else if (p0.id === winnerId) {
+          targetX = p0_cx;
+          targetY = p0_cy;
+      } else if (cornerElements.length > 0) {
+          targetX = cornerElements[0].cx;
+          targetY = cornerElements[0].cy;
+      }
+
+      const duration = 7500; // 7.5 seconds
+      const startTime = performance.now();
+      let x = width / 2;
+      let y = height / 2;
+      let vx = (Math.random() - 0.5) * 30; // initial velocity
+      let vy = (Math.random() - 0.5) * 30;
+
+      const animate = (time: number) => {
+        const elapsed = time - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        if (progress < 0.8) {
+           // Bouncing around randomly
+           x += vx;
+           y += vy;
+
+           if (x < 10 || x > width - 10) vx *= -1;
+           if (y < 10 || y > height - 10) vy *= -1;
+
+           // Keep within bounds
+           x = Math.max(10, Math.min(width - 10, x));
+           y = Math.max(10, Math.min(height - 10, y));
+        } else {
+           // Interpolate towards target
+           const easeProgress = (progress - 0.8) / 0.2;
+           x = x + (targetX - x) * easeProgress * 0.1;
+           y = y + (targetY - y) * easeProgress * 0.1;
+        }
+
+        setBallPos({ x, y });
+
+        if (progress < 1) {
+          reqRef.current = requestAnimationFrame(animate);
+        }
+      };
+
+      reqRef.current = requestAnimationFrame(animate);
+
+    } else {
+       if (reqRef.current) cancelAnimationFrame(reqRef.current);
+       setBallPos({ x: width / 2, y: height / 2 });
+    }
+
+    return () => {
+      if (reqRef.current) cancelAnimationFrame(reqRef.current);
+    };
+  // Note: we intentionally do not include `cornerElements` in the dependency array
+  // because it's recreated on every render and would cause the animation to restart continuously.
+  // We use stringified versions of corner center coordinates to track positional updates if needed,
+  // but for the animation duration (live state), we just want it to run once when status changes to 'live'.
+  }, [status, winnerId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const renderPlayerContent = (p: Player, cx: number, cy: number, avatarSize: number) => {
     return (
       <g key={`content-${p.id}`}>
@@ -184,7 +260,27 @@ export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, curre
 
            {/* Corner Players Content */}
            {cornerElements.map(el => el.showAvatar && renderPlayerContent(el.player, el.cx, el.cy, el.avatarSize))}
+
+           {/* Physics Ball */}
+           {status === 'live' && (
+             <circle
+               cx={ballPos.x}
+               cy={ballPos.y}
+               r={8}
+               fill="#fff"
+               className="drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+             />
+           )}
          </svg>
+
+         {status === 'starting' && countdown !== null && countdown !== undefined && (
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center animate-pulse z-10">
+             <div className="text-5xl font-black italic tracking-tighter text-[#39FF14] drop-shadow-[0_0_10px_rgba(57,255,20,0.8)]">
+               {countdown < 10 ? `0${countdown}` : countdown}
+             </div>
+             <div className="text-xs text-white uppercase tracking-widest mt-1 font-bold">Starting</div>
+           </div>
+         )}
       </div>
     </div>
   );

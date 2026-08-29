@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Gift, Wallet, PenSquare, RefreshCw } from 'lucide-react';
+import { Gift, PenSquare } from 'lucide-react';
 import { TonConnectButton } from '@tonconnect/ui-react';
-import { depositGram, gameSocket } from '../services/api';
+import { gameSocket } from '../services/api';
 import { useGameState } from '../GameStateContext';
 
 export const ControlPanel: React.FC = () => {

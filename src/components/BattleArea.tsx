@@ -120,11 +120,11 @@ export const BattleArea: React.FC<BattleAreaProps> = ({ players, totalBet, curre
       let targetX = p0_cx;
       let targetY = p0_cy;
 
-      const winnerEl = cornerElements.find(el => el.id === winnerId);
+      const winnerEl = cornerElements.find(el => el.id === String(winnerId));
       if (winnerEl) {
           targetX = winnerEl.cx;
           targetY = winnerEl.cy;
-      } else if (p0.id === winnerId) {
+      } else if (p0.id === String(winnerId)) {
           targetX = p0_cx;
           targetY = p0_cy;
       } else if (cornerElements.length > 0) {

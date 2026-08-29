@@ -1,5 +1,5 @@
 import React from 'react';
-import { Hexagon, Trophy, CalendarDays, Rocket, User as UserIcon, ShieldAlert } from 'lucide-react';
+import { Hexagon, Trophy, Rocket, User as UserIcon, ShieldAlert } from 'lucide-react';
 import { useGameState } from '../GameStateContext';
 
 interface BottomNavProps {

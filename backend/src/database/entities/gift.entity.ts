@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { User } from './user.entity.js';
+import type { User } from './user.entity.js';
 
 @Entity('gifts')
 export class Gift {
@@ -19,7 +19,7 @@ export class Gift {
   @Column({ type: 'decimal', precision: 18, scale: 9 })
   estimated_value: number;
 
-  @ManyToOne(() => User, user => user.gifts)
+  @ManyToOne('User', 'gifts')
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
-import { GameParticipant } from './game-participant.entity.js';
+import type { GameParticipant } from './game-participant.entity.js';
 
 @Entity('games')
 export class Game {
@@ -21,6 +21,6 @@ export class Game {
   @Column({ type: 'varchar', nullable: true })
   server_seed: string;
 
-  @OneToMany(() => GameParticipant, participant => participant.game)
+  @OneToMany('GameParticipant', 'game')
   participants: GameParticipant[];
 }

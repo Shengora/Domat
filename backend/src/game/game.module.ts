@@ -6,11 +6,12 @@ import { GameService } from './game.service.js';
 import { GameGateway } from './game.gateway.js';
 import { GramBalance } from '../database/entities/gram-balance.entity.js';
 import { Transaction } from '../database/entities/transaction.entity.js';
+import { Gift } from '../database/entities/gift.entity.js';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Game, GameParticipant, GramBalance, Transaction]),
+    TypeOrmModule.forFeature([Game, GameParticipant, GramBalance, Transaction, Gift]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secret',
       signOptions: { expiresIn: '1h' },

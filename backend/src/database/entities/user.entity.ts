@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryColumn, CreateDateColumn, OneToMany } from 'typeorm';
-import { GramBalance } from './gram-balance.entity.js';
-import { Gift } from './gift.entity.js';
+import type { GramBalance } from './gram-balance.entity.js';
+import type { Gift } from './gift.entity.js';
 
 @Entity('users')
 export class User {
@@ -19,9 +19,9 @@ export class User {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => GramBalance, balance => balance.user)
+  @OneToMany('GramBalance', 'user')
   balances: GramBalance[];
 
-  @OneToMany(() => Gift, gift => gift.user)
+  @OneToMany('Gift', 'user')
   gifts: Gift[];
 }

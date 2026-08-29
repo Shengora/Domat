@@ -61,5 +61,16 @@
     "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.2"
+  },
+  "overrides": {
+    "@nestjs/throttler": {
+      "@nestjs/common": "$@nestjs/common",
+      "@nestjs/core": "$@nestjs/core"
+    },
+    "nestjs-telegraf": {
+      "typescript": "$typescript",
+      "@nestjs/common": "$@nestjs/common",
+      "@nestjs/core": "$@nestjs/core"
+    }
   }
 }

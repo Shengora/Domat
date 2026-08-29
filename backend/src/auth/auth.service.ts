@@ -49,7 +49,7 @@ export class AuthService {
 
     const dbUser = await this.usersService.createOrUpdate(user.id, user.username);
 
-    const payload = { sub: dbUser.telegram_id, username: dbUser.username };
+    const payload = { sub: dbUser.telegram_id, username: dbUser.username, role: dbUser.role };
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: dbUser,

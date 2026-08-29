@@ -12,7 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     TypeOrmModule.forFeature([Game, GameParticipant, GramBalance, Transaction]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'super-secret',
+      secret: process.env.JWT_SECRET || 'secret',
       signOptions: { expiresIn: '1h' },
     }),
   ],

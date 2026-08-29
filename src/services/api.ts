@@ -104,3 +104,28 @@ export const mockDepositGift = async (type: string, estimatedValue: number) => {
   const response = await apiClient.post('/gifts/mock-deposit', { type, estimatedValue });
   return response.data;
 };
+
+export const getAdminUsers = async () => {
+    const response = await apiClient.get('/admin/users');
+    return response.data;
+};
+
+export const adminBanUser = async (id: string) => {
+    const response = await apiClient.post(`/admin/users/${id}/ban`);
+    return response.data;
+};
+
+export const adminModifyBalance = async (id: string, amountChange: number) => {
+    const response = await apiClient.post(`/admin/users/${id}/balance`, { amountChange });
+    return response.data;
+};
+
+export const getAdminTransactions = async () => {
+    const response = await apiClient.get('/admin/transactions');
+    return response.data;
+};
+
+export const getAdminGames = async () => {
+    const response = await apiClient.get('/admin/games');
+    return response.data;
+};

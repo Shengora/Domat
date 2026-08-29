@@ -1,8 +1,12 @@
 import React from 'react';
-import { Hexagon, Trophy, CalendarDays, Rocket, User as UserIcon } from 'lucide-react';
+import { Hexagon, Trophy, CalendarDays, Rocket, User as UserIcon, ShieldAlert } from 'lucide-react';
 import { useGameState } from '../GameStateContext';
 
-export const BottomNav: React.FC = () => {
+interface BottomNavProps {
+    isAdmin?: boolean;
+}
+
+export const BottomNav: React.FC<BottomNavProps> = ({ isAdmin }) => {
   const { currentView, setCurrentView } = useGameState();
 
   return (
@@ -10,7 +14,7 @@ export const BottomNav: React.FC = () => {
 
       <button
         onClick={() => setCurrentView('game')}
-        className={`flex flex-col items-center justify-center space-y-1 w-16 relative ${currentView === 'game' ? 'text-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
+        className={`flex flex-col items-center justify-center space-y-1 w-12 relative ${currentView === 'game' ? 'text-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
       >
         {currentView === 'game' && <div className="absolute -top-3 w-1 h-1 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,1)]"></div>}
         {currentView === 'game' && <Hexagon size={22} fill="currentColor" className="opacity-20 absolute" />}
@@ -18,7 +22,7 @@ export const BottomNav: React.FC = () => {
         <span className="text-[10px] font-medium">Hub</span>
       </button>
 
-      <button className="flex flex-col items-center justify-center w-16 -mt-6">
+      <button className="flex flex-col items-center justify-center w-12 -mt-6">
         <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30 border-4 border-[#121212]">
           <Rocket size={24} className="text-white" />
         </div>
@@ -26,22 +30,28 @@ export const BottomNav: React.FC = () => {
 
       <button
         onClick={() => setCurrentView('profile')}
-        className={`flex flex-col items-center justify-center space-y-1 w-16 relative ${currentView === 'profile' ? 'text-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
+        className={`flex flex-col items-center justify-center space-y-1 w-12 relative ${currentView === 'profile' ? 'text-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
       >
         {currentView === 'profile' && <div className="absolute -top-3 w-1 h-1 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,1)]"></div>}
         <UserIcon size={22} />
         <span className="text-[10px] font-medium">Profile</span>
       </button>
 
-      <button className="flex flex-col items-center justify-center space-y-1 text-gray-500 hover:text-gray-300 w-16">
+      <button className="flex flex-col items-center justify-center space-y-1 text-gray-500 hover:text-gray-300 w-12">
         <Trophy size={22} />
         <span className="text-[10px] font-medium">Race</span>
       </button>
 
-      <button className="flex flex-col items-center justify-center space-y-1 text-gray-500 hover:text-gray-300 w-16">
-        <CalendarDays size={22} />
-        <span className="text-[10px] font-medium">Event</span>
-      </button>
+      {isAdmin && (
+          <button
+            onClick={() => setCurrentView('admin')}
+            className={`flex flex-col items-center justify-center space-y-1 w-12 relative ${currentView === 'admin' ? 'text-red-500' : 'text-gray-500 hover:text-red-400'}`}
+          >
+            {currentView === 'admin' && <div className="absolute -top-3 w-1 h-1 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,1)]"></div>}
+            <ShieldAlert size={22} />
+            <span className="text-[10px] font-bold text-red-500">Admin</span>
+          </button>
+      )}
 
     </div>
   );

@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Player } from './data/mockData';
 
-export type ViewType = 'game' | 'profile';
+export type ViewType = 'game' | 'profile' | 'admin';
 
 interface GameStateContextType {
   status: 'waiting' | 'starting' | 'live' | 'finished';

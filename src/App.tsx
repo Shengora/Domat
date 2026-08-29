@@ -10,6 +10,7 @@ import { useGameState } from './GameStateContext';
 import { WalletModal } from './components/WalletModal';
 import { getBalance } from './services/api';
 import { ProfileScreen } from './components/ProfileScreen';
+import { AdminScreen } from './components/AdminScreen';
 
 declare global {
   interface Window {
@@ -24,7 +25,7 @@ function App() {
   const [isWalletOpen, setIsWalletOpen] = useState(false);
 
   // Mock user details based on typical initData parsing
-  const [user, setUser] = useState<{ id: number, firstName: string, username: string } | null>(null);
+  const [user, setUser] = useState<{ id: number, firstName: string, username: string, role: string } | null>(null);
 
   const fetchBalance = async () => {
       try {
@@ -45,10 +46,10 @@ function App() {
       try {
         const authRes = await authTelegram(initData);
         if (authRes.user) {
-            setUser({ id: authRes.user.telegram_id, firstName: 'User', username: authRes.user.username });
+            setUser({ id: authRes.user.telegram_id, firstName: 'User', username: authRes.user.username, role: authRes.user.role });
         } else {
             // fallback for dev
-            setUser({ id: 123456, firstName: 'Mock', username: 'mockuser' });
+            setUser({ id: 123456, firstName: 'Mock', username: 'mockuser', role: 'user' });
         }
 
         gameSocket.connect();
@@ -107,7 +108,7 @@ function App() {
         {/* Header with Avatar on Left, Balance on Right */}
         <div className="h-16 border-b border-gray-800 flex items-center justify-between px-4 shrink-0 bg-[#121212] z-40">
            {/* Left side: Avatar */}
-           <div className="flex items-center">
+           <div className="flex items-center space-x-3">
                <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-800 border-2 border-purple-500/50 flex-shrink-0">
                   <img src={user ? `https://i.pravatar.cc/150?u=${user.id}` : 'https://i.pravatar.cc/150'} alt="Avatar" className="w-full h-full object-cover" />
                </div>
@@ -126,6 +127,30 @@ function App() {
                </button>
            </div>
         </div>
+
+        {/* Sub-header for History and How To Play */}
+        {currentView === 'game' && (
+            <div className="flex items-center justify-between px-4 py-3 bg-[#1A1A1A] border-b border-gray-800 z-30">
+                <div className="flex space-x-4">
+                    <button className="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-wider transition">
+                        History
+                    </button>
+                    <button className="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-wider transition">
+                        How to play
+                    </button>
+                </div>
+                <div className="flex space-x-4 text-xs font-medium text-gray-500">
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] uppercase text-gray-600">Top Game</span>
+                        <span className="text-green-400">#4829</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] uppercase text-gray-600">Last Game</span>
+                        <span className="text-purple-400">#8912</span>
+                    </div>
+                </div>
+            </div>
+        )}
 
         {/* Main Content Container */}
         <div className="flex-1 overflow-y-auto px-4 pt-6 pb-[200px] no-scrollbar">
@@ -151,10 +176,14 @@ function App() {
               <ProfileScreen user={user} />
           )}
 
+          {currentView === 'admin' && (user?.role === 'superadmin' || user?.role === 'moderator') && (
+              <AdminScreen />
+          )}
+
         </div>
 
         {currentView === 'game' && <ControlPanel />}
-        <BottomNav />
+        <BottomNav isAdmin={user?.role === 'superadmin' || user?.role === 'moderator'} />
 
         <WalletModal isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} />
       </div>

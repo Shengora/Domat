@@ -46,13 +46,21 @@ export class AdminService {
         throw new BadRequestException('Resulting balance cannot be negative');
     }
 
-    // Atomic update
-    await this.balanceRepository
+    // Atomic update with race condition protection for negative balances
+    const query = this.balanceRepository
         .createQueryBuilder()
         .update(GramBalance)
         .set({ amount: () => `"amount" + ${amountChange}` })
-        .where("user_id = :userId", { userId: telegram_id })
-        .execute();
+        .where("user_id = :userId", { userId: telegram_id });
+
+    if (amountChange < 0) {
+        query.andWhere(`"amount" >= ${Math.abs(amountChange)}`);
+    }
+
+    const result = await query.execute();
+    if (result.affected === 0 && amountChange < 0) {
+         throw new BadRequestException('Insufficient balance to deduct');
+    }
 
     const updated = await this.balanceRepository.findOne({ where: { user_id: telegram_id } });
 

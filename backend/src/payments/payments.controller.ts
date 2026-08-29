@@ -9,21 +9,21 @@ export class PaymentsController {
 
   @Post('deposit')
   async deposit(@Req() req: any, @Body('amount') amount: number, @Body('txHash') txHash: string) {
-    return this.paymentsService.handleDeposit(req.user.telegram_id, amount, txHash);
+    return this.paymentsService.handleDeposit(req.user.userId, amount, txHash);
   }
 
   @Post('withdraw')
   async withdraw(@Req() req: any, @Body('amount') amount: number) {
-      return this.paymentsService.handleWithdraw(req.user.telegram_id, amount);
+      return this.paymentsService.handleWithdraw(req.user.userId, amount);
   }
 
   @Get('balance')
   async getBalance(@Req() req: any) {
-      return this.paymentsService.getBalance(req.user.telegram_id);
+      return this.paymentsService.getBalance(req.user.userId);
   }
 
   @Get('history')
   async getHistory(@Req() req: any) {
-      return this.paymentsService.getHistory(req.user.telegram_id);
+      return this.paymentsService.getHistory(req.user.userId);
   }
 }

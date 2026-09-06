@@ -11,6 +11,7 @@ import { WalletModal } from './components/WalletModal';
 import { getBalance } from './services/api';
 import { ProfileScreen } from './components/ProfileScreen';
 import { AdminScreen } from './components/AdminScreen';
+import { Info, MessageCircle, Calendar } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -105,52 +106,64 @@ function App() {
     <div className="min-h-screen bg-[#0A0A0A] text-white flex justify-center">
       <div className="w-full max-w-md bg-[#121212] h-screen relative flex flex-col shadow-2xl overflow-hidden">
 
-        {/* Header with Avatar on Left, Balance on Right */}
-        <div className="h-16 border-b border-gray-800 flex items-center justify-between px-4 shrink-0 bg-[#121212] z-40">
-           {/* Left side: Avatar */}
-           <div className="flex items-center space-x-3">
-               <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-800 border-2 border-purple-500/50 flex-shrink-0">
-                  <img src={user ? `https://i.pravatar.cc/150?u=${user.id}` : 'https://i.pravatar.cc/150'} alt="Avatar" className="w-full h-full object-cover" />
+        {/* Header matching screenshot */}
+        <div className="pt-4 pb-2 px-4 shrink-0 bg-transparent z-40">
+           <div className="flex items-center justify-between">
+               {/* Left side: Info, Chat, Calendar */}
+               <div className="flex items-center space-x-2">
+                   <button className="w-9 h-9 rounded-full bg-[#1e1e1e] flex items-center justify-center text-gray-400 hover:text-white transition">
+                       <Info size={18} />
+                   </button>
+                   <button className="w-9 h-9 rounded-full bg-[#1e1e1e] flex items-center justify-center text-gray-400 hover:text-white transition">
+                       <MessageCircle size={18} />
+                   </button>
+                   <button className="w-9 h-9 rounded-full bg-[#1e1e1e] flex items-center justify-center text-gray-400 hover:text-white transition">
+                       <Calendar size={18} />
+                   </button>
                </div>
-           </div>
 
-           {/* Right side: Balance & Wallet */}
-           <div className="flex items-center space-x-3">
-               <div className="flex items-center space-x-2 cursor-pointer bg-[#1A1A1A] hover:bg-[#242424] px-3 py-1.5 rounded-full transition border border-gray-800" onClick={() => setIsWalletOpen(true)}>
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center">
-                     <span className="text-blue-400 font-bold text-xs">G</span>
+               {/* Right side: Balance & Wallet */}
+               <div className="flex items-center cursor-pointer bg-[#1e1e1e] hover:bg-[#2a2a2a] pl-2 pr-4 py-1.5 rounded-full transition" onClick={() => setIsWalletOpen(true)}>
+                  <div className="flex items-center justify-center mr-2">
+                     <img src="/assets/diamond.png" alt="Diamond" className="w-5 h-5 object-contain" />
                   </div>
-                  <span className="font-bold text-sm">{(balance || 0).toFixed(2)}</span>
+                  <span className="font-bold text-[14px] text-white">{(balance || 0).toFixed(0)} GRAM</span>
                </div>
-               <button onClick={() => setIsWalletOpen(true)} className="text-xs font-semibold text-gray-400 hover:text-white px-3 py-1.5 rounded-full border border-gray-800">
-                   Wallet
-               </button>
            </div>
-        </div>
 
-        {/* Sub-header for History and How To Play */}
-        {currentView === 'game' && (
-            <div className="flex items-center justify-between px-4 py-3 bg-[#1A1A1A] border-b border-gray-800 z-30">
-                <div className="flex space-x-4">
-                    <button className="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-wider transition">
-                        History
-                    </button>
-                    <button className="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-wider transition">
-                        How to play
-                    </button>
-                </div>
-                <div className="flex space-x-4 text-xs font-medium text-gray-500">
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] uppercase text-gray-600">Top Game</span>
-                        <span className="text-green-400">#4829</span>
-                    </div>
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] uppercase text-gray-600">Last Game</span>
-                        <span className="text-purple-400">#8912</span>
-                    </div>
-                </div>
-            </div>
-        )}
+           {/* Sub-header for Top game and Last game */}
+           {currentView === 'game' && (
+               <div className="flex items-center space-x-2 mt-4">
+                   <div className="flex-1 bg-[#1e1e1e] rounded-xl p-3 flex flex-col justify-center">
+                       <div className="text-[10px] text-gray-500 font-semibold mb-1 text-center">Top game</div>
+                       <div className="flex items-center justify-between">
+                           <div className="flex items-center space-x-1.5">
+                               <div className="w-4 h-4 rounded-full bg-pink-500 flex items-center justify-center text-[8px] font-bold">GO</div>
+                               <span className="text-xs text-gray-400 truncate max-w-[60px]">Grey Oscar</span>
+                           </div>
+                           <div className="flex items-center text-white font-bold text-[11px]">
+                               +28 001 <img src="/assets/diamond.png" alt="Diamond" className="w-2.5 h-2.5 ml-1" />
+                           </div>
+                       </div>
+                   </div>
+
+                   <div className="flex-1 bg-[#1e1e1e] rounded-xl p-3 flex flex-col justify-center">
+                       <div className="text-[10px] text-gray-500 font-semibold mb-1 text-center">Last game</div>
+                       <div className="flex items-center justify-between">
+                           <div className="flex items-center space-x-1.5">
+                               <div className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
+                                   <img src="https://i.pravatar.cc/150?u=shhveppes" alt="avatar" className="w-full h-full object-cover" />
+                               </div>
+                               <span className="text-xs text-gray-400 truncate max-w-[60px]">@shhveppes</span>
+                           </div>
+                           <div className="flex items-center text-white font-bold text-[11px]">
+                               +8.55 <img src="/assets/diamond.png" alt="Diamond" className="w-2.5 h-2.5 ml-1" />
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           )}
+        </div>
 
         {/* Main Content Container */}
         <div className="flex-1 overflow-y-auto px-4 pt-6 pb-[200px] no-scrollbar">

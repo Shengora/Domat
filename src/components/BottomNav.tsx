@@ -10,47 +10,53 @@ export const BottomNav: React.FC<BottomNavProps> = ({ isAdmin }) => {
   const { currentView, setCurrentView } = useGameState();
 
   return (
-    <div className="absolute bottom-0 left-0 w-full h-[72px] bg-[#121212] border-t border-gray-800 flex items-center justify-between px-6 z-50">
+    <div className="fixed bottom-4 left-0 w-full px-4 flex items-center gap-3 z-50">
 
-      {/* Left side spacer */}
-      <div className="flex-1 flex justify-start">
-      </div>
+      {/* Pill Container for Arena */}
+      <div className="flex-1 h-[72px] bg-[#161618] rounded-[36px] flex items-center justify-center shadow-lg border border-white/5 relative">
 
-      {/* Center - Arena */}
-      <div className="flex-1 flex justify-center">
+        {/* Arena Button */}
         <button
           onClick={() => setCurrentView('game')}
-          className={`flex flex-col items-center justify-center space-y-1 w-12 relative ${currentView === 'game' ? 'text-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
+          className="flex flex-col items-center justify-center relative w-full h-full"
+          aria-label="Arena"
         >
-          {currentView === 'game' && <div className="absolute -top-3 w-1 h-1 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,1)]"></div>}
-          {currentView === 'game' && <Swords size={22} fill="currentColor" className="opacity-20 absolute" />}
-          <Swords size={22} />
-          <span className="text-[10px] font-medium">Arena</span>
+          <div className={`w-[46px] h-[46px] rounded-full flex items-center justify-center transition-colors mb-3 ${currentView === 'game' ? 'bg-[#0a0a0c]' : 'bg-transparent'}`}>
+            <Swords size={22} className={currentView === 'game' ? 'text-[#C955FF]' : 'text-gray-500'} />
+          </div>
+          <span className={`absolute bottom-2 text-[10px] font-medium leading-none ${currentView === 'game' ? 'text-[#C955FF]' : 'text-gray-500'}`}>
+            Arena
+          </span>
         </button>
+
       </div>
 
-      {/* Right side - Profile & Admin */}
-      <div className="flex-1 flex justify-end gap-2">
+      {/* Profile Button (The large standalone circle on the right) */}
+      <button
+        onClick={() => setCurrentView('profile')}
+        className="w-[72px] h-[72px] shrink-0 rounded-full bg-[#161618] border border-white/5 flex items-center justify-center shadow-lg relative overflow-hidden transition-colors"
+        aria-label="Profile"
+      >
+         {/* Using an inner div to mimic the profile image container in the screenshot */}
+         <div className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all ${currentView === 'profile' ? 'border-[2px] border-[#C955FF] shadow-[0_0_10px_rgba(201,85,255,0.3)]' : 'border-[2px] border-transparent'}`}>
+             <div className="w-[56px] h-[56px] rounded-full bg-[#0a0a0c] flex items-center justify-center overflow-hidden">
+                <UserIcon size={24} className={currentView === 'profile' ? 'text-[#C955FF]' : 'text-gray-400'} />
+             </div>
+         </div>
+      </button>
+
+      {/* Admin Button - Placed floating above if admin is true */}
+      {isAdmin && (
         <button
-          onClick={() => setCurrentView('profile')}
-          className={`flex flex-col items-center justify-center space-y-1 w-12 relative ${currentView === 'profile' ? 'text-purple-500' : 'text-gray-500 hover:text-gray-300'}`}
+          onClick={() => setCurrentView('admin')}
+          className={`absolute -top-14 right-4 w-12 h-12 rounded-full bg-[#161618] border border-red-500/30 flex items-center justify-center shadow-lg ${
+            currentView === 'admin' ? 'text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'text-gray-500'
+          }`}
+          aria-label="Admin"
         >
-          {currentView === 'profile' && <div className="absolute -top-3 w-1 h-1 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,1)]"></div>}
-          <UserIcon size={22} />
-          <span className="text-[10px] font-medium">Profile</span>
+          <ShieldAlert size={20} />
         </button>
-
-        {isAdmin && (
-            <button
-              onClick={() => setCurrentView('admin')}
-              className={`flex flex-col items-center justify-center space-y-1 w-12 relative ${currentView === 'admin' ? 'text-red-500' : 'text-gray-500 hover:text-red-400'}`}
-            >
-              {currentView === 'admin' && <div className="absolute -top-3 w-1 h-1 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,1)]"></div>}
-              <ShieldAlert size={22} />
-              <span className="text-[10px] font-bold text-red-500">Admin</span>
-            </button>
-        )}
-      </div>
+      )}
 
     </div>
   );

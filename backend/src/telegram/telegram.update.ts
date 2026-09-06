@@ -1,5 +1,5 @@
 import { Update, Ctx, Start, Help } from 'nestjs-telegraf';
-import { Context } from 'telegraf';
+import { Context, Markup } from 'telegraf';
 import { UsersService } from '../users/users.service.js';
 
 @Update()
@@ -11,7 +11,15 @@ export class TelegramUpdate {
     if (ctx.from) {
       await this.usersService.createOrUpdate(ctx.from.id, ctx.from.username);
     }
-    await ctx.reply('Welcome to the Battle Game bot! Use the Web App to play.');
+
+    // UI LINK (Replace with actual ngrok/localtunnel link generated)
+    const webAppUrl = 'https://gentle-results-talk.loca.lt';
+
+    await ctx.reply('Welcome to the Battle Game bot! Play now:',
+      Markup.inlineKeyboard([
+        Markup.button.webApp('Play Game', webAppUrl)
+      ])
+    );
   }
 
   @Help()

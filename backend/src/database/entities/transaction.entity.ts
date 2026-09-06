@@ -1,28 +1,23 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity.js';
 
-@Entity('transactions')
+@Entity()
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'bigint' })
-  @Index()
-  user_id: number;
+  @ManyToOne(() => User)
+  user: User;
 
-  @Column({ type: 'enum', enum: ['deposit', 'withdraw', 'win', 'loss'] })
-  type: 'deposit' | 'withdraw' | 'win' | 'loss';
+  @Column({ type: 'varchar' })
+  type: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 9 })
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
 
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  transaction_hash: string; // for ton connect deposit proof
+  @Column({ type: 'varchar', nullable: true })
+  txHash: string; // for blockchain verification
 
   @CreateDateColumn()
-  timestamp: Date;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  createdAt: Date;
 }

@@ -28,12 +28,8 @@ import { AdminModule } from './admin/admin.module.js';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST') || 'localhost',
-        port: configService.get<number>('DB_PORT') || 5432,
-        username: configService.get<string>('DB_USER') || 'game_user',
-        password: configService.get<string>('DB_PASSWORD') || 'game_password',
-        database: configService.get<string>('DB_NAME') || 'game_db',
+        type: 'better-sqlite3',
+        database: 'game_db.sqlite',
         entities: [User, GramBalance, Gift, Game, GameParticipant, Transaction],
         synchronize: true, // Auto-create tables in dev. In prod use migrations
       }),

@@ -1,27 +1,22 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, OneToMany } from 'typeorm';
-import { GramBalance } from './gram-balance.entity.js';
-import { Gift } from './gift.entity.js';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('users')
+@Entity()
 export class User {
-  @PrimaryColumn({ type: 'bigint' })
-  telegram_id: number;
+  @PrimaryColumn({ type: 'varchar' })
+  telegramId: string;
 
   @Column({ type: 'varchar', nullable: true })
   username: string;
 
-  @Column({ type: 'enum', enum: ['user', 'moderator', 'superadmin'], default: 'user' })
-  role: 'user' | 'moderator' | 'superadmin';
+  @Column({ type: 'varchar', default: 'user' })
+  role: string;
 
   @Column({ type: 'boolean', default: false })
-  is_banned: boolean;
+  isBanned: boolean;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
-  @OneToMany(() => GramBalance, balance => balance.user)
-  balances: GramBalance[];
-
-  @OneToMany(() => Gift, gift => gift.user)
-  gifts: Gift[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

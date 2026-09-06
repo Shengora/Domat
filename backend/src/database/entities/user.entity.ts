@@ -1,9 +1,11 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { GramBalance } from './gram-balance.entity.js';
+import { Gift } from './gift.entity.js';
 
-@Entity()
+@Entity('users')
 export class User {
-  @PrimaryColumn({ type: 'varchar' })
-  telegramId: string;
+  @PrimaryColumn({ type: 'bigint' })
+  telegram_id: number;
 
   @Column({ type: 'varchar', nullable: true })
   username: string;
@@ -12,11 +14,14 @@ export class User {
   role: string;
 
   @Column({ type: 'boolean', default: false })
-  isBanned: boolean;
+  is_banned: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @OneToMany(() => GramBalance, balance => balance.user)
+  balances: GramBalance[];
+
+  @OneToMany(() => Gift, gift => gift.user)
+  gifts: Gift[];
 }

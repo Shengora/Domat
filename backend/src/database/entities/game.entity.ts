@@ -1,23 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { GameParticipant } from './game-participant.entity.js';
 
-@Entity()
+@Entity('games')
 export class Game {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  game_id: string;
 
   @Column({ type: 'varchar', default: 'waiting' })
   status: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  totalPool: number;
-
-  @Column({ type: 'varchar', nullable: true })
-  winnerId: string;
-
-  @OneToMany(() => GameParticipant, (participant) => participant.game)
-  participants: GameParticipant[];
+  @Column({ type: 'decimal', precision: 18, scale: 9, default: 0 })
+  total_pool_value: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
+
+  @Column({ type: 'varchar', nullable: true })
+  server_seed_hash: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  server_seed: string;
+
+  @OneToMany(() => GameParticipant, participant => participant.game)
+  participants: GameParticipant[];
 }

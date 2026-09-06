@@ -1,23 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity.js';
 
-@Entity()
+@Entity('gifts')
 export class Gift {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  gift_id: string;
 
-  @ManyToOne(() => User)
-  owner: User;
+  @Column({ type: 'bigint' })
+  @Index()
+  user_id: number;
 
   @Column({ type: 'varchar' })
-  giftType: string;
+  type: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  estimatedValue: number;
+  @Column({ type: 'decimal', precision: 18, scale: 9 })
+  estimated_value: number;
 
   @Column({ type: 'varchar', default: 'free' })
   status: string;
 
   @CreateDateColumn()
-  acquiredAt: Date;
+  acquired_at: Date;
+
+  @ManyToOne(() => User, user => user.gifts)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

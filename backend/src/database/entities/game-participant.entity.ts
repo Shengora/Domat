@@ -1,24 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { Game } from './game.entity.js';
 import { User } from './user.entity.js';
 
-@Entity()
+@Entity('game_participants')
 export class GameParticipant {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  participant_id: string;
 
-  @ManyToOne(() => Game, (game) => game.participants)
+  @Column({ type: 'uuid' })
+  @Index()
+  game_id: string;
+
+  @Column({ type: 'bigint' })
+  @Index()
+  user_id: number;
+
+  @Column({ type: 'varchar' })
+  stake_type: string;
+
+  @Column({ type: 'varchar' })
+  amount_or_gift_id: string;
+
+  @ManyToOne(() => Game, game => game.participants)
+  @JoinColumn({ name: 'game_id' })
   game: Game;
 
   @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  betAmount: number;
-
-  @Column({ type: 'varchar', default: 'gram' })
-  currencyType: string;
-
-  @CreateDateColumn()
-  joinedAt: Date;
 }

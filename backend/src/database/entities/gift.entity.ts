@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Index, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity.js';
 
 @Entity('gifts')
@@ -13,11 +13,14 @@ export class Gift {
   @Column({ type: 'varchar' })
   type: string;
 
-  @Column({ type: 'enum', enum: ['free', 'staked'], default: 'free' })
-  status: 'free' | 'staked';
-
   @Column({ type: 'decimal', precision: 18, scale: 9 })
   estimated_value: number;
+
+  @Column({ type: 'varchar', default: 'free' })
+  status: string;
+
+  @CreateDateColumn()
+  acquired_at: Date;
 
   @ManyToOne(() => User, user => user.gifts)
   @JoinColumn({ name: 'user_id' })

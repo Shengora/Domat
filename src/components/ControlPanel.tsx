@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Gift, PenSquare } from 'lucide-react';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { Gift, Pen, RefreshCw, User as UserIcon } from 'lucide-react';
 import { gameSocket } from '../services/api';
 import { useGameState } from '../GameStateContext';
 
 export const ControlPanel: React.FC = () => {
   const [mode, setMode] = useState<'single' | 'group'>('single');
-  const [activeBet, setActiveBet] = useState<string>('0.5');
+  const [activeBet, setActiveBet] = useState<string>('0.1');
   const { balance } = useGameState();
 
   const handleBet = () => {
@@ -31,55 +30,60 @@ export const ControlPanel: React.FC = () => {
   };
 
   const betOptions = [
-    { type: 'icon', value: 'edit', icon: <PenSquare size={18} /> },
+    { type: 'icon', value: 'edit', icon: <Pen size={18} /> },
     { type: 'text', value: '0.1' },
     { type: 'text', value: '0.5' },
     { type: 'text', value: '1' },
     { type: 'text', value: 'All-in' },
-    { type: 'icon', value: 'action', valueStr: 'BET', icon: <span className="font-black text-white">BET</span>, action: handleBet },
+    { type: 'icon', value: 'action', valueStr: 'BET', icon: <RefreshCw size={18} />, action: handleBet },
   ];
 
   return (
-    <div className="absolute bottom-[72px] left-0 w-full px-4 pointer-events-none">
-      <div className="bg-[#1A1A1A]/95 backdrop-blur-md border border-gray-800 rounded-2xl p-4 shadow-2xl pointer-events-auto">
+    <div className="absolute bottom-[80px] left-0 w-full px-4 pointer-events-none z-40">
+      <div className="bg-transparent pointer-events-auto">
 
         {/* Top row controls */}
         <div className="flex items-center justify-between mb-4">
-
-          {/* Left icons */}
-          <div className="flex space-x-3">
-            <TonConnectButton className="my-ton-connect-btn" />
-            <button className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
-              <Gift size={20} className="text-pink-400" />
+          {/* Left Side: Gift Box & Username */}
+          <div className="flex items-center space-x-2">
+            <button className="w-10 h-10 rounded-xl bg-[#2a2a2a] flex items-center justify-center transition">
+              <Gift size={20} className="text-gray-400" />
             </button>
+            <div className="flex items-center bg-[#1a70ff] px-3 py-2 rounded-full cursor-pointer hover:bg-[#155bd4] transition h-10">
+              <img src="/assets/diamond.png" alt="Diamond" className="w-4 h-4 mr-1.5" />
+              <span className="text-white font-bold text-[14px]">hveppes</span>
+            </div>
           </div>
 
-          {/* Mode Toggle */}
-          <div className="flex bg-gray-800 p-1 rounded-full">
+          {/* Right Side: Mode Toggle */}
+          <div className="flex items-center bg-[#2a2a2a] p-1 rounded-full h-10">
             <button
               onClick={() => setMode('single')}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                mode === 'single' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+              className={`flex items-center px-4 py-1.5 rounded-full text-[13px] font-bold transition-colors ${
+                mode === 'single' ? 'bg-[#c549ff] text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
+              <UserIcon size={14} className="mr-1.5" />
               Single
             </button>
             <button
               onClick={() => setMode('group')}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                mode === 'group' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+              className={`flex items-center px-3 py-1.5 rounded-full text-[13px] font-bold transition-colors ${
+                mode === 'group' ? 'bg-[#c549ff] text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
-              Group
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
             </button>
           </div>
-
-          {/* Right empty spacer for balance if needed */}
-          <div className="w-[88px]"></div>
         </div>
 
         {/* Quick Bets */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-1.5">
           {betOptions.map((opt, idx) => (
             <button
               key={idx}
@@ -90,16 +94,20 @@ export const ControlPanel: React.FC = () => {
                       setActiveBet(opt.value || '');
                   }
               }}
-              className={`flex-1 aspect-square max-h-12 rounded-full flex items-center justify-center text-sm font-bold transition-all
+              className={`flex-1 aspect-square rounded-full flex items-center justify-center font-bold text-[14px] transition-all
                 ${opt.action
-                   ? 'bg-[#39FF14] text-black hover:bg-[#32e011]'
+                   ? 'bg-[#2a2a2a] text-white hover:bg-[#333]'
                    : activeBet === opt.value
-                      ? 'bg-purple-600 text-white border-2 border-purple-400 shadow-[0_0_15px_rgba(147,51,234,0.5)]'
-                      : 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700'
+                      ? 'bg-transparent text-[#888888] border-[3px] border-[#333] shadow-inner relative'
+                      : 'bg-[#2a2a2a] text-[#888888] border border-transparent hover:bg-[#333]'
                  }
               `}
             >
-              {opt.type === 'icon' ? opt.icon : opt.value}
+              {opt.type === 'icon' ? opt.icon : (
+                <div className="flex items-center">
+                   {opt.value} {opt.value !== 'All-in' && <img src="/assets/diamond.png" alt="Diamond" className="w-2.5 h-2.5 ml-1 opacity-50" />}
+                </div>
+              )}
             </button>
           ))}
         </div>

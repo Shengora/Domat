@@ -5,7 +5,7 @@ import { User } from './user.entity.js';
 @Entity('game_participants')
 export class GameParticipant {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  participant_id: string;
 
   @Column({ type: 'uuid' })
   @Index()
@@ -15,8 +15,8 @@ export class GameParticipant {
   @Index()
   user_id: number;
 
-  @Column({ type: 'enum', enum: ['gram', 'gift'] })
-  stake_type: 'gram' | 'gift';
+  @Column({ type: 'varchar' })
+  stake_type: string;
 
   @Column({ type: 'varchar' })
   amount_or_gift_id: string;

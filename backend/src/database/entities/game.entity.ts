@@ -6,8 +6,8 @@ export class Game {
   @PrimaryGeneratedColumn('uuid')
   game_id: string;
 
-  @Column({ type: 'enum', enum: ['waiting', 'starting', 'live', 'finished'], default: 'waiting' })
-  status: 'waiting' | 'starting' | 'live' | 'finished';
+  @Column({ type: 'varchar', default: 'waiting' })
+  status: string;
 
   @Column({ type: 'decimal', precision: 18, scale: 9, default: 0 })
   total_pool_value: number;

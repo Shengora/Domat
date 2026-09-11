@@ -11,6 +11,7 @@ import { UsersModule } from '../users/users.module.js';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         token: configService.get<string>('TELEGRAM_BOT_TOKEN') || 'dummy-token',
+        // Optional webhook if running on domain. For now we use long polling.
       }),
       inject: [ConfigService],
     }),

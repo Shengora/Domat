@@ -10,8 +10,8 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   username: string;
 
-  @Column({ type: 'enum', enum: ['user', 'moderator', 'superadmin'], default: 'user' })
-  role: 'user' | 'moderator' | 'superadmin';
+  @Column({ type: 'varchar', default: 'user' })
+  role: string;
 
   @Column({ type: 'boolean', default: false })
   is_banned: boolean;
